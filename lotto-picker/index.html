@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로또 번호 추첨기 — 5세트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e1118;
+      --surface: #171c28;
+      --border: rgba(255, 215, 120, 0.22);
+      --gold: #f4d03f;
+      --gold-dim: #c9a84a;
+      --text: #e8ecf4;
+      --muted: #8b95a8;
+      --ball-1: #fbc400;
+      --ball-2: #69c800;
+      --ball-3: #ff7300;
+      --ball-4: #aaaaff;
+      --ball-5: #ff0000;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(ellipse 100% 80% at 50% -30%, rgba(244, 208, 63, 0.12), transparent 50%),
+        var(--bg);
+      color: var(--text);
+      padding: clamp(1rem, 4vw, 2rem);
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 5vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+      background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: linear-gradient(165deg, var(--surface) 0%, #12161f 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .sets {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: minmax(3.5rem, auto) 1fr;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    }
+
+    .set-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .set-row:first-child {
+      padding-top: 0;
+    }
+
+      .set-label {
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold-dim);
+      letter-spacing: -0.02em;
+    }
+
+    .balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      justify-content: flex-start;
+    }
+
+    .ball {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      box-shadow:
+        inset 0 -3px 6px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.35),
+        0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .ball.n1 { background: radial-gradient(circle at 30% 25%, #fff6b0, var(--ball-1)); }
+    .ball.n2 { background: radial-gradient(circle at 30% 25%, #d8ffc8, var(--ball-2)); }
+    .ball.n3 { background: radial-gradient(circle at 30% 25%, #ffd4a8, var(--ball-3)); }
+    .ball.n4 { background: radial-gradient(circle at 30% 25%, #e8e8ff, var(--ball-4)); }
+    .ball.n5 { background: radial-gradient(circle at 30% 25%, #ffb0b0, var(--ball-5)); }
+
+    .actions {
+      margin-top: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    button {
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.95rem 1.25rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #1a1408;
+      background: linear-gradient(180deg, #ffeaa7 0%, var(--gold) 45%, #c9a227 100%);
+      box-shadow: 0 4px 0 #8a6d1a, 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 0 #8a6d1a, 0 10px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #8a6d1a, 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    @media (max-width: 380px) {
+      .ball {
+        width: 2.1rem;
+        height: 2.1rem;
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>로또 번호 추첨기</h1>
+      <p class="sub">6/45 · 한 번에 5세트</p>
+    </header>
+
+    <div class="card">
+      <div class="sets" id="sets" aria-live="polite"></div>
+      <div class="actions">
+        <button type="button" id="btnDraw">번호 뽑기</button>
+        <p class="hint">각 세트는 1~45 중 서로 다른 숫자 6개입니다. 당첨을 보장하지 않습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var SET_COUNT = 5;
+      var PICK = 6;
+      var MAX = 45;
+
+      function ballClass(n) {
+        if (n <= 10) return "ball n1";
+        if (n <= 20) return "ball n2";
+        if (n <= 30) return "ball n3";
+        if (n <= 40) return "ball n4";
+        return "ball n5";
+      }
+
+      function oneSet() {
+        var pool = [];
+        for (var i = 1; i <= MAX; i++) pool.push(i);
+        for (var j = pool.length - 1; j > 0; j--) {
+          var k = Math.floor(Math.random() * (j + 1));
+          var t = pool[j];
+          pool[j] = pool[k];
+          pool[k] = t;
+        }
+        var out = pool.slice(0, PICK);
+        out.sort(function (a, b) {
+          return a - b;
+        });
+        return out;
+      }
+
+      function render() {
+        var root = document.getElementById("sets");
+        root.innerHTML = "";
+        for (var s = 0; s < SET_COUNT; s++) {
+          var nums = oneSet();
+          var row = document.createElement("div");
+          row.className = "set-row";
+          var lab = document.createElement("div");
+          lab.className = "set-label";
+          lab.textContent = "세트 " + (s + 1);
+          var balls = document.createElement("div");
+          balls.className = "balls";
+          for (var i = 0; i < nums.length; i++) {
+            var b = document.createElement("span");
+            b.className = ballClass(nums[i]);
+            b.textContent = String(nums[i]);
+            balls.appendChild(b);
+          }
+          row.appendChild(lab);
+          row.appendChild(balls);
+          root.appendChild(row);
+        }
+      }
+
+      document.getElementById("btnDraw").addEventListener("click", render);
+      render();
+    })();
+  </script>
+</body>
+</html>
