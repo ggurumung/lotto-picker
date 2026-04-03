@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>행운 로또 추첨기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 230, 120, 0.35), transparent 25%),
+        radial-gradient(circle at 80% 15%, rgba(255, 180, 50, 0.28), transparent 20%),
+        radial-gradient(circle at 50% 85%, rgba(255, 90, 120, 0.18), transparent 25%),
+        linear-gradient(135deg, #2c0f4a 0%, #4a166a 35%, #8b1f4e 70%, #ffb347 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sparkles::before,
+    .sparkles::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,240,180,0.75) 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1.5px);
+      background-size: 120px 120px, 160px 160px, 220px 220px;
+      background-position: 0 0, 50px 80px, 100px 30px;
+      animation: twinkle 10s linear infinite;
+      opacity: 0.45;
+      z-index: 0;
+    }
+
+    .sparkles::after {
+      animation-duration: 16s;
+      opacity: 0.22;
+      filter: blur(1px);
+    }
+
+    @keyframes twinkle {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .wrap {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 28px 20px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.18);
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #4a2600;
+      background: linear-gradient(90deg, #ffe17b, #ffcf5a, #fff2b5);
+      box-shadow: 0 8px 20px rgba(255, 208, 90, 0.35);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(32px, 6vw, 56px);
+      line-height: 1.1;
+      text-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+
+    .sub {
+      margin: 0 auto;
+      max-width: 760px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.22);
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+    }
+
+    .cold-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .cold-item {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .cold-rank {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .cold-num {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffe89a;
+      text-shadow: 0 0 16px rgba(255, 220, 120, 0.35);
+    }
+
+    .cold-count {
+      font-size: 13px;
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      margin: 28px 0 8px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 800;
+      padding: 18px 30px;
+      border-radius: 999px;
+      color: #542700;
+      background: linear-gradient(90deg, #ffe071, #ffc84b, #fff0a8);
+      box-shadow:
+        0 14px 28px rgba(255, 196, 58, 0.35),
+        inset 0 1px 0 rgba(255,255,255,0.65);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 18px 34px rgba(255, 196, 58, 0.42),
+        inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .set-card {
+      border-radius: 24px;
+      padding: 20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08)),
+        rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 14px 38px rgba(0,0,0,0.2);
+    }
+
+    .set-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      color: #fff2bb;
+    }
+
+    .balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .ball {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: 900;
+      color: #2c1600;
+      background: linear-gradient(145deg, #fff8d8, #ffd55a);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.8),
+        0 8px 18px rgba(255, 208, 90, 0.25);
+    }
+
+    .set-note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.84);
+      line-height: 1.6;
+    }
+
+    .footnote {
+      margin-top: 20px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .mini {
+      opacity: 0.82;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 20px, 1100px); padding-top: 20px; }
+      .hero, .panel { border-radius: 20px; }
+      .ball { width: 46px; height: 46px; font-size: 17px; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sparkles"></div>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="badge">✨ 행운 가득 데이터 기반 추천 ✨</div>
+      <h1>행운 로또 추첨기</h1>
+      <p class="sub">
+        최근 50회에서 상대적으로 적게 나온 숫자를 우선 반영해,
+        한 번 클릭할 때마다 5세트씩 새로운 조합을 보여줍니다.
+      </p>
+      <p class="mini">
+        화면 아래 버튼을 누를 때마다 5세트가 계속 새로 생성됩니다.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>최근 50회 기준 적게 나온 번호 순위</h2>
+      <div id="coldList" class="cold-list"></div>
+      <div class="footnote">
+        기준 설명: 최근 50회 콜드번호 표를 바탕으로 최신 회차 반영용 보정을 적용한 순위입니다.
+        보너스 번호는 제외한 일반 당첨번호 6개 기준입니다.
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="generateBtn">🍀 5세트 다시 뽑기</button>
+    </div>
+
+    <section class="panel">
+      <h2>추천 조합 5세트</h2>
+      <div id="results" class="results"></div>
+      <div class="footnote">
+        참고용 추첨기입니다. 과거 통계는 미래 당첨을 보장하지 않지만,
+        재미있게 번호를 고를 때 기준점으로 쓰기 좋게 만들었습니다.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // 최근 50회(1217회 기준 보정)에서 적게 나온 숫자 순
+    // count = 최근 50회 내 출현 횟수
+    const coldRanking = [
+      { num: 34, count: 2 },
+      { num: 2,  count: 3 },
+      { num: 22, count: 3 },
+      { num: 43, count: 3 },
+      { num: 14, count: 4 },
+      { num: 18, count: 4 },
+      { num: 32, count: 4 },
+      { num: 45, count: 4 },
+      { num: 21, count: 5 },
+      { num: 25, count: 5 },
+      { num: 4,  count: 6 },
+      { num: 10, count: 6 },
+      { num: 11, count: 6 },
+      { num: 13, count: 6 },
+      { num: 20, count: 6 },
+      { num: 29, count: 6 },
+      { num: 39, count: 6 },
+      { num: 41, count: 6 },
+      { num: 42, count: 6 },
+      { num: 44, count: 6 },
+      { num: 12, count: 7 },
+      { num: 15, count: 9 }
+    ];
+
+    const coldListEl = document.getElementById("coldList");
+    const resultsEl = document.getElementById("results");
+    const generateBtn = document.getElementById("generateBtn");
+
+    function renderColdList() {
+      coldListEl.innerHTML = "";
+      coldRanking.slice(0, 12).forEach((item, idx) => {
+        const box = document.createElement("div");
+        box.className = "cold-item";
+        box.innerHTML = `
+          <div>
+            <div class="cold-rank">${idx + 1}위</div>
+            <div class="cold-num">${item.num}</div>
+          </div>
+          <div class="cold-count">최근 50회 ${item.count}회</div>
+        `;
+        coldListEl.appendChild(box);
+      });
+    }
+
+    function weightedPick(pool, used) {
+      const available = pool.filter(item => !used.has(item.num));
+      const totalWeight = available.reduce((sum, item) => sum + item.weight, 0);
+      let r = Math.random() * totalWeight;
+      for (const item of available) {
+        r -= item.weight;
+        if (r <= 0) return item.num;
+      }
+      return available[available.length - 1].num;
+    }
+
+    function buildWeightedPool() {
+      return coldRanking.map((item, idx) => {
+        const rankBias = Math.max(1, 26 - idx);   // 앞순위일수록 가중치 증가
+        const countBias = Math.max(1, 10 - item.count); // 덜 나온 번호일수록 증가
+        return {
+          num: item.num,
+          weight: rankBias * 1.5 + countBias * 2.2
+        };
+      });
+    }
+
+    function isBalanced(nums) {
+      const sorted = [...nums].sort((a, b) => a - b);
+      const odd = sorted.filter(n => n % 2 === 1).length;
+      const low = sorted.filter(n => n <= 22).length;
+      const sum = sorted.reduce((a, b) => a + b, 0);
+
+      let consecutiveRun = 1;
+      let hasTooManyConsecutive = false;
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === sorted[i - 1] + 1) {
+          consecutiveRun++;
+          if (consecutiveRun >= 3) {
+            hasTooManyConsecutive = true;
+            break;
+          }
+        } else {
+          consecutiveRun = 1;
+        }
+      }
+
+      const oddBalanced = odd >= 2 && odd <= 4;
+      const lowBalanced = low >= 2 && low <= 4;
+      const sumBalanced = sum >= 85 && sum <= 190;
+
+      return oddBalanced && lowBalanced && sumBalanced && !hasTooManyConsecutive;
+    }
+
+    function generateOneSet() {
+      const pool = buildWeightedPool();
+
+      for (let attempt = 0; attempt < 250; attempt++) {
+        const used = new Set();
+        while (used.size < 6) {
+          used.add(weightedPick(pool, used));
+        }
+
+        const arr = [...used].sort((a, b) => a - b);
+        if (isBalanced(arr)) return arr;
+      }
+
+      // fallback
+      return [...new Set(coldRanking.slice(0, 10).sort(() => Math.random() - 0.5).slice(0, 6).map(v => v.num))]
+        .sort((a, b) => a - b);
+    }
+
+    function describeSet(nums) {
+      const odd = nums.filter(n => n % 2).length;
+      const even = 6 - odd;
+      const low = nums.filter(n => n <= 22).length;
+      const high = 6 - low;
+      return `홀짝 ${odd}:${even} · 저고 ${low}:${high} · 합계 ${nums.reduce((a,b) => a+b, 0)}`;
+    }
+
+    function renderSets() {
+      resultsEl.innerHTML = "";
+      const generated = new Set();
+
+      for (let i = 1; i <= 5; i++) {
+        let set;
+        let key;
+        do {
+          set = generateOneSet();
+          key = set.join("-");
+        } while (generated.has(key));
+        generated.add(key);
+
+        const card = document.createElement("div");
+        card.className = "set-card";
+        card.innerHTML = `
+          <div class="set-title">행운 세트 ${i}</div>
+          <div class="balls">
+            ${set.map(n => `<span class="ball">${n}</span>`).join("")}
+          </div>
+          <div class="set-note">${describeSet(set)}</div>
+        `;
+        resultsEl.appendChild(card);
+      }
+    }
+
+    renderColdList();
+    renderSets();
+
+    generateBtn.addEventListener("click", renderSets);
+  </script>
+</body>
+</html>
